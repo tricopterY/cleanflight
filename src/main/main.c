@@ -44,6 +44,7 @@
 #include "drivers/bus_i2c.h"
 #include "drivers/bus_spi.h"
 #include "drivers/inverter.h"
+#include "drivers/sonar_hcsr04.h"
 
 #include "flight/flight.h"
 #include "flight/mixer.h"
@@ -109,6 +110,7 @@ void displayInit(rxConfig_t *intialRxConfig);
 void ledStripInit(ledConfig_t *ledConfigsToUse, hsvColor_t *colorsToUse, failsafe_t* failsafeToUse);
 void loop(void);
 void spektrumBind(rxConfig_t *rxConfig);
+const sonarHardware_t *sonarGetHardwareConfiguration(void);
 
 #ifdef STM32F303xC
 // from system_stm32f30x.c
@@ -306,6 +308,18 @@ void init(void)
     if (pwm_params.motorPwmRate > 500)
         pwm_params.idlePulse = 0; // brushed motors
     pwm_params.servoCenterPulse = masterConfig.escAndServoConfig.servoCenterPulse;
+
+#ifdef SONAR
+    if (feature(FEATURE_SONAR)) {
+        const sonarHardware_t *sonarHardware = sonarGetHardwareConfiguration();
+        sonarGPIOConfig_t sonarGPIOConfig = {
+                .echoPin = sonarHardware->trigger_pin,
+                .triggerPin = sonarHardware->echo_pin,
+                .gpio = SONAR_GPIO
+        };
+        pwm_params.sonarGPIOConfig = &sonarGPIOConfig;
+    }
+#endif
 
     pwmRxInit(masterConfig.inputFilteringMode);
 

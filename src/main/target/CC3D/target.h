@@ -108,6 +108,7 @@
 #define TELEMETRY
 #define SERIAL_RX
 #define AUTOTUNE
+#define SONAR
 
 #define SPEKTRUM_BIND
 // USART3, PB11 (Flexport)
